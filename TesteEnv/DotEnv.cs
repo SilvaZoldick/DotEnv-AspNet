@@ -1,4 +1,5 @@
-﻿using GSF.Units;
+using GSF.Units;
+using Microsoft.Graph.SecurityNamespace;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -14,10 +15,17 @@ namespace TesteEnv
 {
     public static class DotEnv
     {
+        public static string ConString { get; set; }
+        public static string IP { get; set; }
+        public static string Senha { get; set; }
+
         public static void CriarEnvs(string path)
         {
             if (!File.Exists(path))
+            {
+                DataSource(false);
                 return;
+            }
 
             foreach (var line in File.ReadAllLines(path))
             {
@@ -52,15 +60,25 @@ namespace TesteEnv
             var conStringSection = (ConnectionStringsSection)configuration.GetSection("connectionStrings");
             var appSettingsSection = (AppSettingsSection)configuration.GetSection("appSettings");
 
-            conStringSection.ConnectionStrings["MyConnectionString"].ConnectionString = "Data Source=" + DataSource();
+            conStringSection.ConnectionStrings["MyConnectionString"].ConnectionString = DataSource();
             appSettingsSection.Settings["URL"].Value = Environment.GetEnvironmentVariable("IP");
 
             configuration.Save();
         }
-        private static string DataSource()
+        private static string DataSource(bool check = true)
         {
-            string dataSource = $"server={Environment.GetEnvironmentVariable("ConString")};database=myDb;uid=myUser;password=myPass";
-            
+            string dataSource = "";
+
+            if (check == true)
+            {
+                ConString = Environment.GetEnvironmentVariable("ConString");
+                Senha = Environment.GetEnvironmentVariable("Senha");
+
+                if (ConString != null)
+                {
+                    dataSource = $"Data Source=server={ConString};database=myDb;uid=myUser;password={Senha}";
+                }                
+            }
             return dataSource;
         }
     }
