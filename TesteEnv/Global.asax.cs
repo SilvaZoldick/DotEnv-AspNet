@@ -16,8 +16,7 @@ namespace TesteEnv
             // Code that runs on application startup
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
-            DotEnv.CriarEnvs(DotEnv.CaminhoEnv());
-            DotEnv.EditarCamposVariaveis();
+            DotEnv.CriarEnvs("App_Data.ImobilModel");
         }
     }
 }

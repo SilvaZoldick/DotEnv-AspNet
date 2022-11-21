@@ -1,29 +1,32 @@
-using GSF.Units;
-using Microsoft.Graph.SecurityNamespace;
+using GSF.Data.Model;
 using System;
-using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Web;
-using System.Web.Configuration;
-using System.Web.UI.HtmlControls;
 using System.Xml;
 
 namespace TesteEnv
 {
     public static class DotEnv
     {
-        public static string ConString { get; set; }
-        public static string IP { get; set; }
-        public static string Senha { get; set; }
-
-        public static void CriarEnvs(string path)
+        private static string dataDir;
+        public static void CriarEnvs(string res)
         {
+            dataDir = res;
+            
+            AdicionarEnvs("dev");
+            EditarConfigFile("Web", "Debug");
+            EditarConfigFile("App", "Debug");
+
+            AdicionarEnvs("prod");
+            EditarConfigFile("Web", "Release");            
+            EditarConfigFile("App", "Release");
+        }
+        private static void AdicionarEnvs(string build) 
+        {            
+            string path = CaminhoEnv(build);
             if (!File.Exists(path))
-            {
-                DataSource(false);
+            {                
                 return;
             }
 
@@ -39,47 +42,81 @@ namespace TesteEnv
                 Environment.SetEnvironmentVariable(part[0], part[1]);
             }
         }
-        public static string CaminhoEnv(string currentPath = null)
+        private static string CaminhoEnv(string build, string currentPath = null)
         {
             DirectoryInfo server = new DirectoryInfo(currentPath ?? HttpContext.Current.Server.MapPath(null));
 
-            while (server != null && !server.GetFiles("*.sln").Any())
+            while (server != null && !server.GetDirectories("envs").Any())
             {
                 server = server.Parent;
             }
 
-            string serverPath = server.Parent.FullName;
-            var envPath = Path.Combine(serverPath.ToString(), ".env");
+            string serverPath = server.FullName;
+            var envPath = Path.Combine(serverPath.ToString(), $"envs/{build}.env");
 
             return envPath;
         }
-        public static void EditarCamposVariaveis()
-        {          
-            var configuration = WebConfigurationManager.OpenWebConfiguration("~");
-
-            var conStringSection = (ConnectionStringsSection)configuration.GetSection("connectionStrings");
-            var appSettingsSection = (AppSettingsSection)configuration.GetSection("appSettings");
-
-            conStringSection.ConnectionStrings["MyConnectionString"].ConnectionString = DataSource();
-            appSettingsSection.Settings["URL"].Value = Environment.GetEnvironmentVariable("IP");
-
-            configuration.Save();
-        }
-        private static string DataSource(bool check = true)
+        private static XmlDocument GetConfigFile(string tipo, string build)
         {
-            string dataSource = "";
+            XmlDocument doc = new XmlDocument();
+            string fileDir = HttpContext.Current.Server.MapPath(null) + "/" + (tipo == "Web" ? $"Web.{build}.config" : $"App.{build}.config");
 
-            if (check == true)
+            if (!File.Exists(fileDir))
             {
-                ConString = Environment.GetEnvironmentVariable("ConString");
-                Senha = Environment.GetEnvironmentVariable("Senha");
-
-                if (ConString != null)
-                {
-                    dataSource = $"Data Source=server={ConString};database=myDb;uid=myUser;password={Senha}";
-                }                
+                return new XmlDocument();
             }
-            return dataSource;
+            XmlReaderSettings settings = new XmlReaderSettings();
+            settings.IgnoreComments = true;
+            XmlReader reader = XmlReader.Create(fileDir, settings);
+
+            doc.Load(reader);
+            reader.Close();
+            return doc;
+        }
+        private static void EditarConfigFile(string tipo, string build)
+        {
+            XmlDocument configFile = GetConfigFile(tipo, build);
+
+            if (configFile.InnerXml != "")
+            {            
+                XmlNode configurationNode;
+
+                configurationNode = configFile.ChildNodes[1];
+                SetConnectionString(configurationNode.ChildNodes[0]);
+                SetAppSetting(configurationNode.ChildNodes[1]);
+
+                string name = configFile.Name;
+                string nameFile = tipo == "Web" ? $"Web.{build}.config" : $"App.{build}.config";
+
+                configFile.Save(HttpContext.Current.Server.MapPath(null) + "/" + nameFile);
+            }
+        }
+        private static void SetConnectionString(XmlNode connectionStringList)
+        {
+            string connection = $"Data Source={Environment.GetEnvironmentVariable("IP")};Initial Catalog={Environment.GetEnvironmentVariable("Catalog")};User ID={Environment.GetEnvironmentVariable("User")};Password={Environment.GetEnvironmentVariable("Senha")}";
+
+            if (connectionStringList != null)
+            {
+                foreach (XmlNode connectionString in connectionStringList)
+                {
+                    if (connectionString.Attributes[0].Value.Contains("Entities"))
+                    {
+                        connection = $"metadata=res://*/{dataDir}.csdl|res://*/{dataDir}.ssdl|res://*/{dataDir}.msl;provider=System.Data.SqlClient;provider connection string=\";{connection};multipleactiveresultsets=True;application name=EntityFramework\";";
+                    }
+
+                    connectionString.Attributes[1].Value = connection;
+                }
+            }
+        }
+        private static void SetAppSetting(XmlNode appSettingsList)
+        {
+            if (appSettingsList!= null)
+            {
+                foreach (XmlNode appSetting in appSettingsList)
+                {
+                    appSetting.Attributes[1].Value = Environment.GetEnvironmentVariable(appSetting.Attributes[0].Value);
+                }
+            }            
         }
     }
 }

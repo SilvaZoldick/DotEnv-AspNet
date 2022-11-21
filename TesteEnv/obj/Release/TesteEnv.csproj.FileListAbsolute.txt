@@ -1,0 +1,2 @@
+C:\inetpub\wwwroot\CSharp\TesteEnv\TesteEnv\obj\Release\TesteEnv.csproj.AssemblyReference.cache
+C:\inetpub\wwwroot\CSharp\TesteEnv\TesteEnv\obj\Release\TesteEnv.csproj.CoreCompileInputs.cache
