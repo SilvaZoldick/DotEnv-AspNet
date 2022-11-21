@@ -1,4 +1,3 @@
-using GSF.Data.Model;
 using System;
 using System.IO;
 using System.Linq;
@@ -59,7 +58,8 @@ namespace TesteEnv
         private static XmlDocument GetConfigFile(string tipo, string build)
         {
             XmlDocument doc = new XmlDocument();
-            string fileDir = HttpContext.Current.Server.MapPath(null) + "/" + (tipo == "Web" ? $"Web.{build}.config" : $"App.{build}.config");
+            string fileDir = HttpContext.Current.Server.MapPath(null) + "/" + 
+                            tipo == "Web" ? $"Web.{build}.config" : $"App.{build}.config";
 
             if (!File.Exists(fileDir))
             {
@@ -93,7 +93,10 @@ namespace TesteEnv
         }
         private static void SetConnectionString(XmlNode connectionStringList)
         {
-            string connection = $"Data Source={Environment.GetEnvironmentVariable("IP")};Initial Catalog={Environment.GetEnvironmentVariable("Catalog")};User ID={Environment.GetEnvironmentVariable("User")};Password={Environment.GetEnvironmentVariable("Senha")}";
+            string connection = $"Data Source={Environment.GetEnvironmentVariable("IP")};" +
+                                $"Initial Catalog={Environment.GetEnvironmentVariable("Catalog")};" +
+                                $"User ID={Environment.GetEnvironmentVariable("User")};" +
+                                $"Password={Environment.GetEnvironmentVariable("Senha")}";
 
             if (connectionStringList != null)
             {
@@ -101,7 +104,11 @@ namespace TesteEnv
                 {
                     if (connectionString.Attributes[0].Value.Contains("Entities"))
                     {
-                        connection = $"metadata=res://*/{dataDir}.csdl|res://*/{dataDir}.ssdl|res://*/{dataDir}.msl;provider=System.Data.SqlClient;provider connection string=\";{connection};multipleactiveresultsets=True;application name=EntityFramework\";";
+                        connection = $"metadata=res://*/{dataDir}.csdl|res://*/{dataDir}.ssdl|res://*/{dataDir}.msl;" +
+                                     "provider=System.Data.SqlClient;" +
+                                     "provider connection string=\";" +
+                                     $"{connection};" +
+                                     "multipleactiveresultsets=True;application name=EntityFramework\";";
                     }
 
                     connectionString.Attributes[1].Value = connection;
