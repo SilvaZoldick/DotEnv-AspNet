@@ -1,0 +1,2 @@
+C:\Users\silva\OneDrive\Documentos\Estudo\Projetinhos\C#\ConfigController\obj\Base\ConfigController.csproj.AssemblyReference.cache
+C:\Users\silva\OneDrive\Documentos\Estudo\Projetinhos\C#\ConfigController\obj\Base\ConfigController.csproj.CoreCompileInputs.cache
