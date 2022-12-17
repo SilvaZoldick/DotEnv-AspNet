@@ -1,0 +1,6 @@
+E:\Coding\EnvControl\DotEnvControl\bin\Debug\DotEnvControl.dll
+E:\Coding\EnvControl\DotEnvControl\bin\Debug\DotEnvControl.pdb
+E:\Coding\EnvControl\DotEnvControl\obj\Debug\DotEnvControl.csproj.AssemblyReference.cache
+E:\Coding\EnvControl\DotEnvControl\obj\Debug\DotEnvControl.csproj.CoreCompileInputs.cache
+E:\Coding\EnvControl\DotEnvControl\obj\Debug\DotEnvControl.dll
+E:\Coding\EnvControl\DotEnvControl\obj\Debug\DotEnvControl.pdb
