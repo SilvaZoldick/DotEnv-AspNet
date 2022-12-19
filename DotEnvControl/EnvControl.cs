@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -6,22 +6,30 @@ using System.Xml;
 
 namespace DotEnvControl
 {
-    public static class DotEnv
+    public static class EnvControl
     {
-        private static string dataDir;
-        private static string httpContextPath;
+        private static string dataDir; // Localização dos arquivos da base de dados (modelo ADO.NET)
+
+        private static DirectoryInfo projectDir, solutionDir, serverDir;        
+
         public static void CriarEnvs(string res)
         {
             dataDir = res;
-            httpContextPath = HttpContext.Current.Server.MapPath(null);
 
-            AdicionarEnvs("dev");
-            EditarConfigFile("Web", "Debug");
-            EditarConfigFile("App", "Debug");
+            projectDir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+            solutionDir = new DirectoryInfo(projectDir.Parent.FullName);
+            serverDir = new DirectoryInfo(solutionDir.Parent.FullName);
 
-            AdicionarEnvs("prod");
-            EditarConfigFile("Web", "Release");
-            EditarConfigFile("App", "Release");
+            if (serverDir.GetDirectories("envs").Any())
+            {
+                AdicionarEnvs("dev");
+                EditarConfigFile("Web", "Debug");
+                EditarConfigFile("App", "Debug");
+
+                AdicionarEnvs("prod");
+                EditarConfigFile("Web", "Release");
+                EditarConfigFile("App", "Release");
+            }
         }
         private static void AdicionarEnvs(string build)
         {
@@ -44,25 +52,35 @@ namespace DotEnvControl
                 Environment.SetEnvironmentVariable(part[0], part[1]);
             }
         }
-        private static string CaminhoEnv(string build, string currentPath = null)
-        {
-            DirectoryInfo server = new DirectoryInfo(currentPath ?? httpContextPath);
+        private static string CaminhoEnv(string build)
+        {              
+            string envPath = null;
 
-            while (server != null && !server.GetDirectories("envs").Any())
+            if (serverDir != null)
             {
-                server = server.Parent;
+                envPath = $"{serverDir.FullName}/envs/{build}.env";
             }
-
-            string serverPath = server.FullName;
-            var envPath = Path.Combine(serverPath.ToString(), $"envs/{build}.env");
 
             return envPath;
         }
         private static XmlDocument GetConfigFile(string tipo, string build)
         {
             XmlDocument doc = new XmlDocument();
-            string fileDir = httpContextPath + "/" +
-                            tipo == "Web" ? $"Web.{build}.config" : $"App.{build}.config";
+
+            string fileDir = null;
+            string nameFile = $"{tipo}.{build}.config";
+                               
+            foreach(DirectoryInfo projectFolder in solutionDir.GetDirectories())
+            {
+                if (projectFolder.GetFiles(nameFile).Any())
+                {
+                    if (tipo != "Web" || projectFolder.Name == projectDir.Name)
+                    { 
+                        fileDir = projectFolder.FullName + "/" + nameFile;
+                        break;
+                    }
+                }
+            }
 
             if (!File.Exists(fileDir))
             {
@@ -78,33 +96,54 @@ namespace DotEnvControl
         }
         private static void EditarConfigFile(string tipo, string build)
         {
-            XmlDocument configFile = GetConfigFile(tipo, build);
-
-            if (configFile.InnerXml != "")
+            try
             {
-                XmlNode configurationNode;
+                XmlDocument configFile = GetConfigFile(tipo, build);                
 
-                configurationNode = configFile.ChildNodes[1];
-                SetConnectionString(configurationNode.ChildNodes[0]);
-                SetAppSetting(configurationNode.ChildNodes[1]);
+                if (configFile.InnerXml != "")
+                {
+                    XmlNode configurationNode;
 
-                string name = configFile.Name;
-                string nameFile = tipo == "Web" ? $"Web.{build}.config" : $"App.{build}.config";
+                    configurationNode = configFile.ChildNodes[1];
+                    SetConnectionString(configurationNode.ChildNodes[0]);
+                    SetAppSetting(configurationNode.ChildNodes[1]);
+                    
+                    string fileDir = null;
+                    string nameFile = $"{tipo}.{build}.config";
 
-                configFile.Save(httpContextPath + "/" + nameFile);
+                    foreach (DirectoryInfo projectFolder in solutionDir.GetDirectories())
+                    {
+                        if (projectFolder.GetFiles(nameFile).Any())
+                        {
+                            if (tipo != "Web" || projectFolder.Name == projectDir.Name)
+                            {
+                                fileDir = projectFolder.FullName + "/" + nameFile;
+                                break;
+                            }
+                        }
+                    }
+
+                    configFile.Save(fileDir);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Erro: " + e.Message);
             }
         }
         private static void SetConnectionString(XmlNode connectionStringList)
         {
-            string connection = $"Data Source={Environment.GetEnvironmentVariable("IP")};" +
-                                $"Initial Catalog={Environment.GetEnvironmentVariable("Catalog")};" +
-                                $"User ID={Environment.GetEnvironmentVariable("User")};" +
-                                $"Password={Environment.GetEnvironmentVariable("Senha")}";
+            string connection;
 
             if (connectionStringList != null)
             {
                 foreach (XmlNode connectionString in connectionStringList)
                 {
+                    connection = $"Data Source={Environment.GetEnvironmentVariable("fonteBase")};" +
+                                $"Initial Catalog={Environment.GetEnvironmentVariable("DB")};" +
+                                $"User ID={Environment.GetEnvironmentVariable("loginBase")};" +
+                                $"Password={Environment.GetEnvironmentVariable("senha")}";
+
                     if (connectionString.Attributes[0].Value.Contains("Entities"))
                     {
                         connection = $"metadata=res://*/{dataDir}.csdl|res://*/{dataDir}.ssdl|res://*/{dataDir}.msl;" +
@@ -113,7 +152,6 @@ namespace DotEnvControl
                                      $"{connection};" +
                                      "multipleactiveresultsets=True;application name=EntityFramework\";";
                     }
-
                     connectionString.Attributes[1].Value = connection;
                 }
             }
