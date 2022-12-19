@@ -4,3 +4,9 @@ E:\Coding\EnvControl\DotEnvControl\obj\Debug\DotEnvControl.csproj.AssemblyRefere
 E:\Coding\EnvControl\DotEnvControl\obj\Debug\DotEnvControl.csproj.CoreCompileInputs.cache
 E:\Coding\EnvControl\DotEnvControl\obj\Debug\DotEnvControl.dll
 E:\Coding\EnvControl\DotEnvControl\obj\Debug\DotEnvControl.pdb
+C:\Users\Israel\Documents\DotEnv-AspNet\DotEnvControl\bin\Debug\DotEnvControl.dll
+C:\Users\Israel\Documents\DotEnv-AspNet\DotEnvControl\bin\Debug\DotEnvControl.pdb
+C:\Users\Israel\Documents\DotEnv-AspNet\DotEnvControl\obj\Debug\DotEnvControl.csproj.AssemblyReference.cache
+C:\Users\Israel\Documents\DotEnv-AspNet\DotEnvControl\obj\Debug\DotEnvControl.csproj.CoreCompileInputs.cache
+C:\Users\Israel\Documents\DotEnv-AspNet\DotEnvControl\obj\Debug\DotEnvControl.dll
+C:\Users\Israel\Documents\DotEnv-AspNet\DotEnvControl\obj\Debug\DotEnvControl.pdb
