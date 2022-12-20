@@ -11,7 +11,7 @@ jobs:
     env:
       CAMINHO_PROJETO: ./DotEnvControl/DotEnvControl.csproj
 
-    runs-on: windows-10
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
