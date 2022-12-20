@@ -10,3 +10,8 @@ C:\Users\Israel\Documents\DotEnv-AspNet\DotEnvControl\obj\Debug\DotEnvControl.cs
 C:\Users\Israel\Documents\DotEnv-AspNet\DotEnvControl\obj\Debug\DotEnvControl.csproj.CoreCompileInputs.cache
 C:\Users\Israel\Documents\DotEnv-AspNet\DotEnvControl\obj\Debug\DotEnvControl.dll
 C:\Users\Israel\Documents\DotEnv-AspNet\DotEnvControl\obj\Debug\DotEnvControl.pdb
+C:\Users\Israel\Documents\Local\Pessoal\DotEnv-AspNet\DotEnvControl\obj\Debug\DotEnvControl.csproj.CoreCompileInputs.cache
+C:\Users\Israel\Documents\Local\Pessoal\DotEnv-AspNet\DotEnvControl\obj\Debug\DotEnvControl.dll
+C:\Users\Israel\Documents\Local\Pessoal\DotEnv-AspNet\DotEnvControl\obj\Debug\DotEnvControl.pdb
+C:\Users\Israel\Documents\Local\Pessoal\DotEnv-AspNet\DotEnvControl\bin\Debug\DotEnvControl.dll
+C:\Users\Israel\Documents\Local\Pessoal\DotEnv-AspNet\DotEnvControl\bin\Debug\DotEnvControl.pdb

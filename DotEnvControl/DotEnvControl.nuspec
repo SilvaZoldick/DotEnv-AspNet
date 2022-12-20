@@ -9,9 +9,9 @@
     <license type="expression">MIT</license>
     <!-- <icon>icon.png</icon> -->
     <projectUrl>http://project_url_here_or_delete_this_line/</projectUrl>
-    <description>Classe manipuladora de arquivos de configuração</description>
-    <releaseNotes>Mapeamento de diretórios de projeto, solução e servidor</releaseNotes>
-    <copyright>Copyright Israel Júnior@2022</copyright>
-    <tags>GitHub;Nuget;DotEnvControl</tags>
+    <description>$description$</description>
+    <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
+    <copyright>$copyright$</copyright>
+    <tags>NuGet;.NET 4.6;Classlib;GitHub;Actions</tags>
   </metadata>
 </package>

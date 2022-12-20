@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Web;
 using System.Xml;
 
 namespace DotEnvControl
@@ -51,9 +52,9 @@ namespace DotEnvControl
                 Environment.SetEnvironmentVariable(part[0], part[1]);
             }
         }
-        private static string CaminhoEnv(string build, string currentPath = null)
+        private static string CaminhoEnv(string build)
         {
-            DirectoryInfo server = new DirectoryInfo(currentPath ?? httpContextPath);
+            string envPath = null;
 
             if (serverDir != null)
             {
@@ -65,8 +66,21 @@ namespace DotEnvControl
         private static XmlDocument GetConfigFile(string tipo, string build)
         {
             XmlDocument doc = new XmlDocument();
-            string fileDir = httpContextPath + "/" +
-                            tipo == "Web" ? $"Web.{build}.config" : $"App.{build}.config";
+
+            string fileDir = null;
+            string nameFile = $"{tipo}.{build}.config";
+
+            foreach (DirectoryInfo projectFolder in solutionDir.GetDirectories())
+            {
+                if (projectFolder.GetFiles(nameFile).Any())
+                {
+                    if (tipo != "Web" || projectFolder.Name == projectDir.Name)
+                    {
+                        fileDir = projectFolder.FullName + "/" + nameFile;
+                        break;
+                    }
+                }
+            }
 
             if (!File.Exists(fileDir))
             {
@@ -82,18 +96,32 @@ namespace DotEnvControl
         }
         private static void EditarConfigFile(string tipo, string build)
         {
-            XmlDocument configFile = GetConfigFile(tipo, build);
+            try
+            {
+                XmlDocument configFile = GetConfigFile(tipo, build);
 
                 if (configFile.InnerXml != "")
                 {
                     XmlNode configurationNode;
 
-                configurationNode = configFile.ChildNodes[1];
-                SetConnectionString(configurationNode.ChildNodes[0]);
-                SetAppSetting(configurationNode.ChildNodes[1]);
+                    configurationNode = configFile.ChildNodes[1];
+                    SetConnectionString(configurationNode.ChildNodes[0]);
+                    SetAppSetting(configurationNode.ChildNodes[1]);
 
-                string name = configFile.Name;
-                string nameFile = tipo == "Web" ? $"Web.{build}.config" : $"App.{build}.config";
+                    string fileDir = null;
+                    string nameFile = $"{tipo}.{build}.config";
+
+                    foreach (DirectoryInfo projectFolder in solutionDir.GetDirectories())
+                    {
+                        if (projectFolder.GetFiles(nameFile).Any())
+                        {
+                            if (tipo != "Web" || projectFolder.Name == projectDir.Name)
+                            {
+                                fileDir = projectFolder.FullName + "/" + nameFile;
+                                break;
+                            }
+                        }
+                    }
 
                     configFile.Save(fileDir);
                 }
